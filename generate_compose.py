@@ -64,6 +64,9 @@ services:
     container_name: green-agent
     command: ["--host", "0.0.0.0", "--port", "{green_port}", "--card-url", "http://green-agent:{green_port}"]
     environment:{green_env}
+      - TAU2_DATA_DIR=/home/agent/data
+    volumes:
+      - ./data:/home/agent/data
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:{green_port}/.well-known/agent-card.json"]
       interval: 5s
