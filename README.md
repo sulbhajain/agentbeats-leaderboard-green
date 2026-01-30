@@ -67,3 +67,46 @@ git push
 ```
 
 Congratulations - your leaderboard is now ready to accept submissions!
+
+-----
+
+### Green Agent related updates
+
+- Brief description of your green agent and what it orchestrates
+
+The agent evaluation system implements a partial credits mechanism for tool calling accuracy. This allows for nuanced scoring when tool calls are partially correct.
+
+- How scoring/evaluation works
+
+### Scoring Logic
+
+The scoring system evaluates predicted tool calls against gold standard (expected) tool calls using the following rules:
+
+1. **Tool Name Mismatch** - If the predicted tool name doesn't match the gold standard tool name:
+   - **Result:** No credit (`[False, 0.0]`)
+
+2. **No Arguments to Compare** - If neither the predicted nor gold standard tool call has arguments to compare:
+   - **Result:** Full credit (`[True, 1.0]`)
+
+3. **Exact Argument Match** - If all required arguments match exactly between predicted and gold standard:
+   - **Result:** Full credit (`[True, 1.0]`)
+
+4. **Partial Argument Match** - If the tool call is correct but some arguments don't match:
+   - **Result:** Partial credit (`[True, 0.5]`)
+
+### Example Scenarios
+
+- **Perfect Tool Call:** Agent calls `search_flights` with all correct arguments → Score: `1.0`
+- **Wrong Tool:** Agent calls `book_hotel` instead of `search_flights` → Score: `0.0`
+- **Correct Tool, Missing/Wrong Args:** Agent calls `search_flights` but with incorrect or incomplete arguments → Score: `0.5`
+- **No Arguments Needed:** Agent calls `get_status` with no arguments (and none expected) → Score: `1.0`
+
+- Any configurable parameters (like task specification)
+
+### Configuration
+
+The `compare_args` parameter in a tool call definition allows specifying which arguments should be evaluated. If `compare_args` is `None`, all arguments in the predicted tool call are evaluated against all arguments in the gold standard tool call.
+
+- Requirements for participant agents
+
+Your A2A agents must respond to natural language requests.

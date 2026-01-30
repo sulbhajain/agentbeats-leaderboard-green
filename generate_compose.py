@@ -4,6 +4,7 @@ import argparse
 import os
 import re
 import sys
+import textwrap
 from pathlib import Path
 from typing import Any
 
@@ -53,60 +54,66 @@ A2A_SCENARIO_PATH = "a2a-scenario.toml"
 ENV_PATH = ".env.example"
 
 DEFAULT_PORT = 9009
-DEFAULT_ENV_VARS = {"PYTHONUNBUFFERED": "1"}
+DEFAULT_ENV_VARS = {"PYTHONUNBUFFERED": "1", "TAU2_DATA_DIR": "/app/data"}
 
-COMPOSE_TEMPLATE = """# Auto-generated from scenario.toml
+COMPOSE_TEMPLATE = (
+        "# Auto-generated from scenario.toml\n\n"
+        "services:\n"
+        "  green-agent:\n"
+        "    image: {green_image}\n"
+        "    platform: linux/amd64\n"
+        "    container_name: green-agent\n"
+        "    command: [\"--host\", \"0.0.0.0\", \"--port\", \"{green_port}\", \"--card-url\", \"http://green-agent:{green_port}\"]\n"
+        "    environment:{green_env}\n"
+        "    healthcheck:\n"
+        "      test: [\"CMD\", \"curl\", \"-f\", \"http://localhost:{green_port}/.well-known/agent-card.json\"]\n"
+        "      interval: 5s\n"
+        "      timeout: 3s\n"
+        "      retries: 10\n"
+        "      start_period: 30s\n"
+        "    volumes:\n"
+        "      - ./data:/app/data\n"
+        "    depends_on:{green_depends}\n"
+        "    networks:\n"
+        "      - agent-network\n\n"
+        "{participant_services}"
+        "  agentbeats-client:\n"
+        "    image: ghcr.io/agentbeats/agentbeats-client:v1.0.0\n"
+        "    platform: linux/amd64\n"
+        "    container_name: agentbeats-client\n"
+        "    environment:\n"
+        "      - TAU2_DATA_DIR=/app/data\n"
+        "    volumes:\n"
+        "      - ./a2a-scenario.toml:/app/scenario.toml\n"
+        "      - ./output:/app/output\n"
+        "      - ./data:/app/data\n"
+        "    command: [\"scenario.toml\", \"output/results.json\"]\n"
+        "    depends_on:{client_depends}\n"
+        "    networks:\n"
+        "      - agent-network\n\n"
+        "networks:\n"
+        "  agent-network:\n"
+        "    driver: bridge\n"
+)
 
-services:
-  green-agent:
-    image: {green_image}
-    platform: linux/amd64
-    container_name: green-agent
-    command: ["--host", "0.0.0.0", "--port", "{green_port}", "--card-url", "http://green-agent:{green_port}"]
-    environment:{green_env}
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:{green_port}/.well-known/agent-card.json"]
-      interval: 5s
-      timeout: 3s
-      retries: 10
-      start_period: 30s
-    depends_on:{green_depends}
-    networks:
-      - agent-network
-
-{participant_services}
-  agentbeats-client:
-    image: ghcr.io/agentbeats/agentbeats-client:v1.0.0
-    platform: linux/amd64
-    container_name: agentbeats-client
-    volumes:
-      - ./a2a-scenario.toml:/app/scenario.toml
-      - ./output:/app/output
-    command: ["scenario.toml", "output/results.json"]
-    depends_on:{client_depends}
-    networks:
-      - agent-network
-
-networks:
-  agent-network:
-    driver: bridge
-"""
-
-PARTICIPANT_TEMPLATE = """  {name}:
-    image: {image}
-    platform: linux/amd64
-    container_name: {name}
-    command: ["--host", "0.0.0.0", "--port", "{port}", "--card-url", "http://{name}:{port}"]
-    environment:{env}
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:{port}/.well-known/agent-card.json"]
-      interval: 5s
-      timeout: 3s
-      retries: 10
-      start_period: 30s
-    networks:
-      - agent-network
-"""
+PARTICIPANT_TEMPLATE = (
+        "  {name}:\n"
+        "    image: {image}\n"
+        "    platform: linux/amd64\n"
+        "    container_name: {name}\n"
+        "    command: [\"--host\", \"0.0.0.0\", \"--port\", \"{port}\", \"--card-url\", \"http://{name}:{port}\"]\n"
+        "    environment:{env}\n"
+        "    volumes:\n"
+        "      - ./data:/app/data\n"
+        "    healthcheck:\n"
+        "      test: [\"CMD\", \"curl\", \"-f\", \"http://localhost:{port}/.well-known/agent-card.json\"]\n"
+        "      interval: 5s\n"
+        "      timeout: 3s\n"
+        "      retries: 10\n"
+        "      start_period: 30s\n"
+        "    networks:\n"
+        "      - agent-network\n"
+)
 
 A2A_SCENARIO_TEMPLATE = """[green_agent]
 endpoint = "http://green-agent:{green_port}"
