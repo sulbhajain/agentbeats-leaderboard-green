@@ -1,0 +1,17 @@
+{
+  "image_digests": {
+    "green-agent": "ghcr.io/sulbhajain/agentbeats_green@sha256:f046e0acfe0e78a015d05337c44d427b4a06f1375b1bbbfb47feba3dffc5ef18",
+    "agent": "ghcr.io/mikhail-osintsev/purple-tau2-agent@sha256:6e691bca6f4453bfc4f54ddcf7c0897e0a2fd30e50ea5b1a01265f8bf4f684d4",
+    "agentbeats-client": "ghcr.io/agentbeats/agentbeats-client@sha256:13dfe3ef4e583a80e7ce2fe3becd0ce3b879841368a7f4fa40b6ebbabeeb014e"
+  },
+  "timestamp": "2026-03-29T11:13:49Z",
+  "github_actions": {
+    "run_url": "https://github.com/Mikhail-Osintsev/agentbeats-leaderboard-green/actions/runs/23707727945",
+    "run_logs_url": "https://api.github.com/repos/Mikhail-Osintsev/agentbeats-leaderboard-green/actions/runs/23707727945/logs",
+    "ref": "refs/heads/main",
+    "sha": "849a3199c20a6ad84267569dcb70d621d419c697",
+    "repository_url": "https://github.com/Mikhail-Osintsev/agentbeats-leaderboard-green",
+    "workflow_ref": "Mikhail-Osintsev/agentbeats-leaderboard-green/.github/workflows/run-scenario.yml@refs/heads/main",
+    "workflow_sha": "849a3199c20a6ad84267569dcb70d621d419c697"
+  }
+}
